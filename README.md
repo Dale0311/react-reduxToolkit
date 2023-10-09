@@ -14,6 +14,8 @@
 
 ### installation
 
+npm install @reduxjs/toolkit
+
 ### setting up
 
 ##### create a file where I can configure store.
@@ -59,7 +61,7 @@ todos: []<br>
 
 - @store
   i: todoReducer from "./features/todoSlice"
-  export const store = configureStore({reducers: [{ todoReducer}]})
+  export const store = configureStore({reducer: [{ todoReducer}]})
 
 ##### provide context to the app
 
