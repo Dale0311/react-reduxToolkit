@@ -15,6 +15,7 @@
 ### installation
 
 npm install @reduxjs/toolkit
+npm install react-redux
 
 ### setting up
 

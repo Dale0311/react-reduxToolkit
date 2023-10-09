@@ -1,5 +1,11 @@
+import Home from "./components/pages/Home";
 function App() {
-  return <h1 className="text-3xl text-red-500"> Hello world </h1>;
+  return (
+    <div>
+      {" "}
+      <Home />{" "}
+    </div>
+  );
 }
 
 export default App;

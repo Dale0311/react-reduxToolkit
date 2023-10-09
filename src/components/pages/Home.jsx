@@ -1,28 +1,21 @@
+import Todo from "../utils/Todo";
+import AddTodo from "../utils/AddTodo";
+import { useSelector } from "react-redux";
 function Home() {
+  const todos = useSelector((state) => state.todos);
   return (
-    <article class="hover:animate-background rounded-xl bg-gradient-to-r from-green-300 via-blue-500 to-purple-600 p-0.5 shadow-xl transition hover:bg-[length:400%_400%] hover:shadow-sm hover:[animation-duration:_4s]">
-      <div class="rounded-[10px] bg-white p-4 !pt-20 sm:p-6">
-        <time datetime="2022-10-10" class="block text-xs text-gray-500">
-          10th Oct 2022
-        </time>
-
-        <a href="#">
-          <h3 class="mt-0.5 text-lg font-medium text-gray-900">
-            How to center an element using JavaScript and jQuery
-          </h3>
-        </a>
-
-        <div class="mt-4 flex flex-wrap gap-1">
-          <span class="whitespace-nowrap rounded-full bg-purple-100 px-2.5 py-0.5 text-xs text-purple-600">
-            Snippet
-          </span>
-
-          <span class="whitespace-nowrap rounded-full bg-purple-100 px-2.5 py-0.5 text-xs text-purple-600">
-            JavaScript
-          </span>
-        </div>
+    <div className="flex justify-center my-10">
+      <div className="space-y-5">
+        {todos.map((todo) => (
+          <Todo
+            key={todo.id}
+            isCompleted={todo.isCompleted}
+            title={todo.title}
+          />
+        ))}
+        <AddTodo />
       </div>
-    </article>
+    </div>
   );
 }
 
