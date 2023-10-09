@@ -56,13 +56,14 @@ todos: []<br>
 
 - exporting
   e: const {addTodo, deleteTodo} = todoSlice.actions -> export each reducer to use it on later part
+  e: const selectAllTodos = (state) =>
   e: todoSlice.reducer -> to pass in our store
 
 ##### wiring 'em up
 
 - @store
   i: todoReducer from "./features/todoSlice"
-  export const store = configureStore({reducer: [{ todoReducer}]})
+  export const store = configureStore({reducer: {todos: todoReducer, user: userReducer}})
 
 ##### provide context to the app
 
@@ -84,3 +85,60 @@ i: useDispatch from "react-redux"
 i: reducer e.g: addTodo
 c: const dispatch = useDispatch();
 dispatch(addTodo({})) -> pass action which any data that contains user input
+
+### Async Actions
+
+it is use for async fn such as fetching data, subscribing to an event etc..
+i: {createAsyncThunk} from "@reduxjs/toolkit:"
+c: const fetchTodos = createAsyncThunk()
+
+params:
+
+1. action string -> fetchAllTodos
+2. payload async callback -> async()=>{}
+
+##### instantiate the extraReducers
+
+through builder we can access .addCase, addMatcher, addDefaultCase
+NOTE: promise has 3 internal states. these are fulfilled, pending and error.
+extraReducer(builder)=>{
+builder.addCase((fetchTodos.pending), (state, action)){
+}
+}
+
+### RTK Query
+
+##### creating slice
+
+i: createApi -> simillar to createSlice
+const todosApi = createApi(obj)
+
+<b>parameters:</b>
+
+1. reducerPath -> it is just a name for your reducer
+2. baseQuery -> for setting up baseUrl
+   baseQuery: fetchBaseQuery({baseUrl: < base url here >})
+3. endpoints -> all api endpoints
+   get the builder parameter from the endpoints
+   endpoints: (builder)=>({endpoint here})
+
+##### creating 1 endpoint
+
+getAllProducts: base.query({query: () => "products"})
+query() -> can take a userInput and it can be any data type.
+
+##### exporting
+
+export const {useGetAllProducts} = todosApi
+
+##### wrapping
+
+@app
+i: {ApiProvider} from "@reduxjs/toolkit/query/react"
+i: {todosApi} from "./features/todosApi"
+
+<Provider store={store}>
+  <ApiProvider api={todosApi}>
+    <App />
+  </ApiProvider>
+</Provider>
