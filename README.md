@@ -91,14 +91,14 @@ dispatch(addTodo({})) -> pass action which any data that contains user input
 it is use for async fn such as fetching data, subscribing to an event etc..
 i: {createAsyncThunk} from "@reduxjs/toolkit:"
 c: export const fetchTodos = createAsyncThunk("Todos/fetchTodos", async () => {
-  try {
-    const res = await axios.get(
-      "https://645c8a84250a246ae30744d5.mockapi.io/todos"
-    );
-    return res.data;
-  } catch (e) {
-    return e.message;
-  }
+try {
+const res = await axios.get(
+"https://645c8a84250a246ae30744d5.mockapi.io/todos"
+);
+return res.data;
+} catch (e) {
+return e.message;
+}
 });
 
 params:
@@ -113,36 +113,39 @@ NOTE: promise has 3 internal states. these are fulfilled, pending and error.
 extraReducer(builder)=>{
 builder
 .addCase(fetchTodos.fulfilled, (state, action) => {
-     state.status = "succeded";
-     state.todos = action.payload;
-   })
+state.status = "succeded";
+state.todos = action.payload;
+})
 .addCase(fetchTodos.pending, (state, action) => {
-     state.status = "loading";
-   })
+state.status = "loading";
+})
 }
+
 ##### exporting
+
 export const selectAllTodos = (state) => state.todos.todos;
 export const getTodosStatus = (state) => state.todos.status;
 export const getTodosError = (state) => state.todos.error;
 
 ##### @file you want to fetch, e:g Todos
+
 i: useDispatch, useSelector
 i: {selectAllTodos, getTodosStatus, getTodosError, fetchTodos} from "todoSlice"
 i: useEffect
 
 useEffect(() => {
- if (blogsStatus === "idle") {
-   dispatch(fetchBlogs());
- }
+if (blogsStatus === "idle") {
+dispatch(fetchBlogs());
+}
 }, [blogsStatus]);
 
 let content;
-  if (blogsStatus === "loading") {
-    content = <p>Loading...</p>;
-  } else if (blogsStatus === "succeded") {
-    content = blogs.map((blog) => {
-      return (
-        <BlogCard
+if (blogsStatus === "loading") {
+content = <p>Loading...</p>;
+} else if (blogsStatus === "succeded") {
+content = blogs.map((blog) => {
+return (
+<BlogCard
           key={blog.id}
           id={blog.id}
           title={blog.title}
@@ -150,14 +153,15 @@ let content;
           author={blog.author}
           likes={blog.likes}
         />
-      );
-    });
-  } else if (blogsStatus === "failed") {
-    content = <p>{blogsError}</p>;
-  }
+);
+});
+} else if (blogsStatus === "failed") {
+content = <p>{blogsError}</p>;
+}
 render content
 
 ##### .unwrap
+
 lets me create a promise to a returned promise
 
 ### RTK Query
@@ -175,19 +179,79 @@ const todosApi = createApi(obj)
 3. endpoints -> all api endpoints
    get the builder parameter from the endpoints
    endpoints: (builder)=>({endpoint here})
+4. tagTypes -> are use in cache returned data
 
 ##### creating 1 endpoint
 
-getAllProducts: base.query({query: () => "products"})
-query() -> can take a userInput and it can be any data type.
+```React
+endpoints: (builder) => ({
+  getShoes: builder.query({
+    query: () => "/shoes",
+    providesTags: ["Shoes"], //use the Shoes data in cache if it exist.
+    transformResponse: (res) => res.sort((a, b) => b.id - a.id),
+  }),
+})
+```
 
 ##### exporting
 
-export const {useGetAllProducts} = todosApi
+```React
+export const {
+  useGetShoesQuery,
+  useAddShoeMutation,
+  useUpdateShoeMutation,
+  useDeleteShoeMutation,
+} = apiSlice;
+```
+
+##### example
+
+```React
+export const apiSlice = createApi({
+  reducerPath: "api",
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://645c8a84250a246ae30744d5.mockapi.io",
+  }),
+  tagTypes: ["Shoes"], //cache
+  endpoints: (builder) => ({
+   getShoes: builder.query({
+      query: () => "/shoes",
+      providesTags: ["Shoes"], // if there's a Shoes data in cache, use it.
+      transformResponse: (res) => res.sort((a, b) => b.id - a.id), //transform data
+    }),
+    addShoe: builder.mutation({
+      query: (shoe) => ({
+        url: "/shoes",
+        method: "POST",
+        body: shoe,
+      }),
+      invalidatesTags: ["Shoes"], // idc if theres a Shoes data in cache, perform refetch
+    }),
+    updateShoe: builder.mutation({
+      query: (shoe) => ({
+        url: "/shoes/" + shoe.id,
+        method: "PATCH",
+        body: shoe,
+      }),
+      invalidatesTags: ["Shoes"],
+    }),
+    deleteShoe: builder.mutation({
+      query: ({ id }) => ({
+        url: "/shoes/" + id,
+        method: "DELETE",
+        body: id,
+      }),
+      invalidatesTags: ["Shoes"],
+    }),
+  }),
+});
+```
 
 ##### wrapping
 
 @app
+
+```React
 i: {ApiProvider} from "@reduxjs/toolkit/query/react"
 i: {todosApi} from "./features/todosApi"
 
@@ -196,3 +260,4 @@ i: {todosApi} from "./features/todosApi"
     <App />
   </ApiProvider>
 </Provider>
+```
