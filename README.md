@@ -90,11 +90,20 @@ dispatch(addTodo({})) -> pass action which any data that contains user input
 
 it is use for async fn such as fetching data, subscribing to an event etc..
 i: {createAsyncThunk} from "@reduxjs/toolkit:"
-c: const fetchTodos = createAsyncThunk()
+c: export const fetchTodos = createAsyncThunk("Todos/fetchTodos", async () => {
+  try {
+    const res = await axios.get(
+      "https://645c8a84250a246ae30744d5.mockapi.io/todos"
+    );
+    return res.data;
+  } catch (e) {
+    return e.message;
+  }
+});
 
 params:
 
-1. action string -> fetchAllTodos
+1. action string -> fetchTodos
 2. payload async callback -> async()=>{}
 
 ##### instantiate the extraReducers
@@ -102,9 +111,52 @@ params:
 through builder we can access .addCase, addMatcher, addDefaultCase
 NOTE: promise has 3 internal states. these are fulfilled, pending and error.
 extraReducer(builder)=>{
-builder.addCase((fetchTodos.pending), (state, action)){
+builder
+.addCase(fetchTodos.fulfilled, (state, action) => {
+     state.status = "succeded";
+     state.todos = action.payload;
+   })
+.addCase(fetchTodos.pending, (state, action) => {
+     state.status = "loading";
+   })
 }
-}
+##### exporting
+export const selectAllTodos = (state) => state.todos.todos;
+export const getTodosStatus = (state) => state.todos.status;
+export const getTodosError = (state) => state.todos.error;
+
+##### @file you want to fetch, e:g Todos
+i: useDispatch, useSelector
+i: {selectAllTodos, getTodosStatus, getTodosError, fetchTodos} from "todoSlice"
+i: useEffect
+
+useEffect(() => {
+ if (blogsStatus === "idle") {
+   dispatch(fetchBlogs());
+ }
+}, [blogsStatus]);
+
+let content;
+  if (blogsStatus === "loading") {
+    content = <p>Loading...</p>;
+  } else if (blogsStatus === "succeded") {
+    content = blogs.map((blog) => {
+      return (
+        <BlogCard
+          key={blog.id}
+          id={blog.id}
+          title={blog.title}
+          body={blog.body}
+          author={blog.author}
+          likes={blog.likes}
+        />
+      );
+    });
+  } else if (blogsStatus === "failed") {
+    content = <p>{blogsError}</p>;
+  }
+render content
+
 
 ### RTK Query
 
