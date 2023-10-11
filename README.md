@@ -157,6 +157,8 @@ let content;
   }
 render content
 
+##### .unwrap
+lets me create a promise to a returned promise
 
 ### RTK Query
 
